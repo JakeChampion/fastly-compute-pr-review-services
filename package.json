@@ -5,6 +5,14 @@
   },
   "scripts": {
     "build": "js-compute-runtime ./src/index.js",
-    "deploy": "fastly compute publish"
+    "deploy": "fastly compute publish",
+    "start": "fastly compute serve --verbose",
+    "test": "NODE_ENV='production' start-server-and-test start 'http://127.0.0.1:7676' test:integration",
+    "test:integration": "mocha test/integration/*.test.js test/integration/**/*.test.js --recursive --check-leaks --timeout 60000 --exit --bail"
+  },
+  "devDependencies": {
+    "axios": "^1.3.6",
+    "mocha": "^10.2.0",
+    "start-server-and-test": "^2.0.0"
   }
 }
