@@ -1,11 +1,3 @@
-# Empty Starter Kit for JavaScript
+# Fastly Compute Review Services Per Pull Request
 
-[![Deploy to Fastly](https://deploy.edgecompute.app/button)](https://deploy.edgecompute.app/deploy)
-
-An empty application template for the Fastly Compute@Edge environment which simply returns a 200 OK response.
-
-**For more details about other starter kits for Compute@Edge, see the [Fastly developer hub](https://developer.fastly.com/solutions/starters)**
-
-## Security issues
-
-Please see our [SECURITY.md](SECURITY.md) for guidance on reporting security-related issues.
+This is an example project showcasing how to configure GitHub Workflows using Fastly's CLI to deploy a new Fastly Compute Service for each pull request and then delete the service when the pull request has been merged/closed.
