@@ -1,6 +1,14 @@
 name: 'Branch Preview'
 description: 'Preview Fastly Service'
 
+inputs:
+  fastly-api-token:
+    description: 'The Fastly API token to use for interacting with Fastly API'
+    required: true
+  github-token:
+    description: 'The GitHub token to use for downloading the Fastly CLI'
+    required: true
+
 runs:
     using: "composite"
     steps:
@@ -12,7 +20,7 @@ runs:
       - name: Set up Fastly CLI
         uses: fastly/compute-actions/setup@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.github-token }}
           cli_version: '10.2.0'
       - run: yarn
         shell: bash
@@ -25,7 +33,7 @@ runs:
 
       # Delete the Fastly Service
       - if: github.event.action == closed
-        run: fastly service delete --quiet --service-name ${{ steps.service-name.outputs.SERVICE_NAME }} --force --token ${{ secrets.FASTLY_API_KEY }} || true
+        run: fastly service delete --quiet --service-name ${{ steps.service-name.outputs.SERVICE_NAME }} --force --token ${{ inputs.fastly-api-token }} || true
         shell: bash
 
       # Add the service name to fastly.toml so that the Fstly CLI is aware of the new name
@@ -35,22 +43,22 @@ runs:
       # Deploy to Fastly and let Fastly choose a subdomain of edgecompute.app to attach to the service
       - if: github.event.action != closed
         run: |
-          if fastly service describe --quiet --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ secrets.FASTLY_API_KEY }} ; then
-            FASTLY_SERVICE_ID="$(fastly service describe --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ secrets.FASTLY_API_KEY }} --quiet --json | jq -r '.ID')" fastly compute publish --verbose --token ${{ secrets.FASTLY_API_KEY }}
+          if fastly service describe --quiet --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ inputs.fastly-api-token }} ; then
+            FASTLY_SERVICE_ID="$(fastly service describe --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ inputs.fastly-api-token }} --quiet --json | jq -r '.ID')" fastly compute publish --verbose --token ${{ inputs.fastly-api-token }}
           else
-            fastly compute publish --verbose -i --token ${{ secrets.FASTLY_API_KEY }}
+            fastly compute publish --verbose -i --token ${{ inputs.fastly-api-token }}
           fi
         shell: bash
       # Retrieve the newly created domain for the service and add it to the pull-request summary
       - if: github.event.action != closed
-        run: fastly domain list --quiet --version latest --json --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ secrets.FASTLY_API_KEY }} | jq -r '.[0].Name'
+        run: fastly domain list --quiet --version latest --json --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ inputs.fastly-api-token }} | jq -r '.[0].Name'
         shell: bash
 
       - if: github.event.action != closed
         name: Set domain
         shell: bash
         id: domain
-        run: echo "DOMAIN=$(fastly domain list --quiet --version latest --json --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ secrets.FASTLY_API_KEY }} | jq -r '.[0].Name')" >> "$GITHUB_OUTPUT"
+        run: echo "DOMAIN=$(fastly domain list --quiet --version latest --json --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ inputs.fastly-api-token }} | jq -r '.[0].Name')" >> "$GITHUB_OUTPUT"
 
 
       - if: github.event.action != closed
