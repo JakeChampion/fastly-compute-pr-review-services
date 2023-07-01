@@ -15,7 +15,7 @@ outputs:
     value: ${{ steps.domain.outputs.DOMAIN }}
   service_name:
     description: "Preview service name for Fastly Compute@Edge Service"
-    valie ${{ steps.service-name.outputs.SERVICE_NAME }}
+    value: ${{ steps.service-name.outputs.SERVICE_NAME }}
 
 runs:
     using: "composite"
