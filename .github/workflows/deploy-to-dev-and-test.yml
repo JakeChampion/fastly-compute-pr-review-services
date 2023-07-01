@@ -11,8 +11,7 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/preview
+      - uses: JakeChampion/fastly-compute-branch-preview@v1
         with:
           fastly-api-token: ${{ secrets.FASTLY_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      
