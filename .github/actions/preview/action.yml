@@ -9,14 +9,19 @@ inputs:
     description: 'The GitHub token to use for downloading the Fastly CLI'
     required: true
 
+outputs:
+  domain:
+    description: "Preview domain for Fastly Compute@Edge Service"
+    value: ${{ steps.domain.outputs.DOMAIN }}
+  service_name:
+    description: "Preview service name for Fastly Compute@Edge Service"
+    valie ${{ steps.service-name.outputs.SERVICE_NAME }}
+
 runs:
     using: "composite"
     steps:
       - uses: actions/checkout@v3
-      # Download Yarn and the Fastly CLI and install the project dependencies
-      - uses: actions/setup-node@v3
-        with:
-          cache: 'yarn'
+      # Download Fastly CLI
       - name: Set up Fastly CLI
         uses: fastly/compute-actions/setup@v4
         with:
@@ -60,15 +65,7 @@ runs:
         id: domain
         run: echo "DOMAIN=$(fastly domain list --quiet --version latest --json --service-name="${{ steps.service-name.outputs.SERVICE_NAME }}" --token ${{ inputs.fastly-api-token }} | jq -r '.[0].Name')" >> "$GITHUB_OUTPUT"
 
-
       - if: github.event.action != 'closed'
         shell: bash
         name: Add domain to summary
         run: echo 'This pull-request has been deployed to Fastly and is available at <https://${{ steps.domain.outputs.DOMAIN }}> 🚀' >> $GITHUB_STEP_SUMMARY
-
-      # Run our integration tests against the newly deployed service
-      - if: github.event.action != 'closed'
-        shell: bash
-        run: npm run test:integration
-        env:
-          HOST: "https://${{ steps.domain.outputs.DOMAIN }}"
